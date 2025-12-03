@@ -1,7 +1,7 @@
 import { Box, Tooltip, Typography } from "@mui/material";
 import EmptyPoster from "../assets/EmptyMovie.png";
 
-export default function MovieCard({ movie, onClick, refProp }) {
+function MovieCard({ movie, onClick, refProp }) {
   return (
     <Box ref={refProp} sx={{ cursor: "pointer" }}>
       <div className="poster-wrapper" onClick={onClick}>
@@ -22,3 +22,5 @@ export default function MovieCard({ movie, onClick, refProp }) {
     </Box>
   );
 }
+
+export default MovieCard;

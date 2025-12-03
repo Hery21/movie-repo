@@ -9,11 +9,12 @@ function MovieDetailPage() {
   const [movie, setMovie] = useState(null);
 
   useEffect(() => {
-    async function fetchMovie() {
+    const loadMovie = async () => {
       const res = await getData(`i=${imdbID}`);
       setMovie(res);
-    }
-    fetchMovie();
+    };
+
+    loadMovie();
   }, [imdbID]);
 
   if (!movie) return <div>Loading...</div>;
