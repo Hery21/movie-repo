@@ -3,11 +3,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useState, useRef, useCallback } from "react";
 import { getData } from "../utils/fetch";
 import EmptyPoster from "../assets/EmptyMovie.png";
-import { useNavigate } from "react-router-dom";
+import PosterDialog from "../components/PosterDialog";
 
 function HomePage() {
   const ref = useRef();
-  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [movieList, setMovieList] = useState([]);
@@ -86,8 +85,12 @@ function HomePage() {
     [loading, hasMore, page, fetchMovies]
   );
 
-  const handleSelectMovie = (id) => {
-    navigate(`/movie/${id}`);
+  const [openMoviePoster, setOpenMoviePoster] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState("");
+
+  const handleOpenPosterDialog = (movie) => {
+    setSelectedMovie(movie);
+    setOpenMoviePoster(!openMoviePoster);
   };
 
   return (
@@ -134,7 +137,7 @@ function HomePage() {
           return (
             <Box key={movie.imdbID} ref={isLast ? lastMovieRef : null}>
               <div
-                onClick={() => handleSelectMovie(movie.imdbID)}
+                onClick={() => handleOpenPosterDialog(movie)}
                 className="poster-wrapper"
               >
                 <img
@@ -170,6 +173,14 @@ function HomePage() {
         <Typography textAlign="center" sx={{ mb: 5 }}>
           Loading...
         </Typography>
+      )}
+
+      {openMoviePoster && (
+        <PosterDialog
+          open={openMoviePoster}
+          movie={selectedMovie}
+          onClose={handleOpenPosterDialog}
+        />
       )}
     </>
   );
