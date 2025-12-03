@@ -27,7 +27,7 @@ Search movies, browse with infinite scroll, view detailed information, and enjoy
 
 - Node.js ≥ 18
 - npm (or yarn/pnpm)
-- Free [OMDB API Key](https://www.omdbapi.com/apikey.aspx)
+- Free [OMDB API Key](https://www.omdbapi.com/)
 
 ## Setup
 
@@ -37,10 +37,4 @@ cd movie-repo
 npm install
 npm run dev
 npm run test:coverage
-```
-
-## Create a .env file in the root:
-
-```
-VITE_OMDB_API_KEY=your_omdb_api_key_here
 ```
