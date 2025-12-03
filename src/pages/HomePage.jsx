@@ -84,6 +84,10 @@ function HomePage() {
     [loading, hasMore, page, fetchMovies]
   );
 
+  const handleSelectMovie = (e) => {
+    console.log("first", e);
+  };
+
   return (
     <>
       <div
@@ -127,15 +131,20 @@ function HomePage() {
 
           return (
             <Box key={movie.imdbID} ref={isLast ? lastMovieRef : null}>
-              <img
-                src={movie.Poster !== "N/A" ? movie.Poster : EmptyPoster}
-                alt={movie.Title}
-                style={{ width: "200px", height: "300px", borderRadius: 8 }}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = EmptyPoster;
-                }}
-              />
+              <div
+                onClick={() => handleSelectMovie(movie.imdbID)}
+                className="poster-wrapper"
+              >
+                <img
+                  src={movie.Poster !== "N/A" ? movie.Poster : EmptyPoster}
+                  alt={movie.Title}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = EmptyPoster;
+                  }}
+                />
+              </div>
+
               <Tooltip title={movie.Title}>
                 <Typography
                   noWrap
