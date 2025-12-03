@@ -28,13 +28,29 @@ function HomePage() {
           `type=movie&s=${searchTerm}&page=${pageNum}`
         );
 
-        if (pageNum === 1) {
-          setMovieList(resMovies.Search || []);
-        } else {
-          setMovieList((prev) => [...prev, ...(resMovies.Search || [])]);
+        const uniqueResults = [];
+        const seen = new Set();
+
+        for (const m of resMovies.Search || []) {
+          if (!seen.has(m.imdbID)) {
+            seen.add(m.imdbID);
+            uniqueResults.push(m);
+          }
         }
 
-        setHasMore(resMovies.Search?.length > 0);
+        if (pageNum === 1) {
+          setMovieList(uniqueResults);
+        } else {
+          setMovieList((prev) => {
+            const existingIDs = new Set(prev.map((m) => m.imdbID));
+            const uniqueAcrossPages = uniqueResults.filter(
+              (m) => !existingIDs.has(m.imdbID)
+            );
+            return [...prev, ...uniqueAcrossPages];
+          });
+        }
+
+        setHasMore(uniqueResults.length > 0);
         setPage(pageNum);
       } catch (err) {
         console.error(err);
