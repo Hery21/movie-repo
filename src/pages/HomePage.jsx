@@ -3,15 +3,17 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useState, useRef, useCallback } from "react";
 import { getData } from "../utils/fetch";
 import EmptyPoster from "../assets/EmptyMovie.png";
+import { useNavigate } from "react-router-dom";
 
 function HomePage() {
+  const ref = useRef();
+  const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [movieList, setMovieList] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const observer = useRef();
 
   const handleTypeSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -71,21 +73,21 @@ function HomePage() {
     (node) => {
       if (loading) return;
 
-      if (observer.current) observer.current.disconnect();
+      if (ref.current) ref.current.disconnect();
 
-      observer.current = new IntersectionObserver((entries) => {
+      ref.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
           fetchMovies(page + 1);
         }
       });
 
-      if (node) observer.current.observe(node);
+      if (node) ref.current.observe(node);
     },
     [loading, hasMore, page, fetchMovies]
   );
 
-  const handleSelectMovie = (e) => {
-    console.log("first", e);
+  const handleSelectMovie = (id) => {
+    navigate(`/movie/${id}`);
   };
 
   return (
