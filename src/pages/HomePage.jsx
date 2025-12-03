@@ -1,201 +1,92 @@
-import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
+// pages/HomePage.jsx
+import { Box, IconButton, TextField, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useState, useRef, useCallback, useEffect } from "react";
-import { getData } from "../utils/fetch";
-import EmptyPoster from "../assets/EmptyMovie.png";
-import PosterDialog from "../components/PosterDialog";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
+import PosterDialog from "../components/PosterDialog";
+import MovieCard from "../components/MovieCard";
+
 import { setStoredSearchTerm } from "../redux/slice";
+import { useMovies } from "../hooks/useMovies";
+import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 
 function HomePage() {
-  const ref = useRef();
-
   const dispatch = useDispatch();
   const savedTerm = useSelector((state) => state.search.term);
 
-  const [searchTerm, setSearchTerm] = useState(savedTerm);
-  const [movieList, setMovieList] = useState([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(savedTerm || "");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
-  const handleTypeSearch = (e) => {
-    setSearchTerm(e.target.value);
-  };
+  const { movies, loading, hasMore, page, fetchMovies, setMovies } =
+    useMovies();
 
-  const fetchMovies = useCallback(
-    async (pageNum = 1) => {
-      if (!searchTerm) return;
-
-      setLoading(true);
-
-      try {
-        const resMovies = await getData(
-          `type=movie&s=${searchTerm}&page=${pageNum}`
-        );
-
-        const uniqueResults = [];
-        const seen = new Set();
-
-        for (const m of resMovies.Search || []) {
-          if (!seen.has(m.imdbID)) {
-            seen.add(m.imdbID);
-            uniqueResults.push(m);
-          }
-        }
-
-        if (pageNum === 1) {
-          setMovieList(uniqueResults);
-        } else {
-          setMovieList((prev) => {
-            const existingIDs = new Set(prev.map((m) => m.imdbID));
-            const uniqueAcrossPages = uniqueResults.filter(
-              (m) => !existingIDs.has(m.imdbID)
-            );
-            return [...prev, ...uniqueAcrossPages];
-          });
-        }
-
-        setHasMore(uniqueResults.length > 0);
-        setPage(pageNum);
-      } catch (err) {
-        console.error(err);
-      }
-
-      setLoading(false);
-    },
-    [searchTerm]
+  const lastMovieRef = useInfiniteScroll(hasMore, loading, () =>
+    fetchMovies(searchTerm, page + 1)
   );
 
   const startSearch = () => {
     dispatch(setStoredSearchTerm(searchTerm));
-
-    setMovieList([]);
-    setPage(1);
-    fetchMovies(1);
+    setMovies([]);
+    fetchMovies(searchTerm, 1);
   };
 
   useEffect(() => {
     if (!savedTerm) return;
-
-    setTimeout(() => {
-      fetchMovies(savedTerm);
-    }, 0);
+    fetchMovies(savedTerm);
   }, [savedTerm, fetchMovies]);
 
-  const lastMovieRef = useCallback(
-    (node) => {
-      if (loading) return;
-
-      if (ref.current) ref.current.disconnect();
-
-      ref.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          fetchMovies(page + 1);
-        }
-      });
-
-      if (node) ref.current.observe(node);
-    },
-    [loading, hasMore, page, fetchMovies]
-  );
-
-  const [openMoviePoster, setOpenMoviePoster] = useState(false);
-  const [selectedMovie, setSelectedMovie] = useState("");
-
-  const handleOpenPosterDialog = (movie) => {
+  const openPoster = (movie) => {
     setSelectedMovie(movie);
-    setOpenMoviePoster(!openMoviePoster);
+    setOpenDialog(true);
   };
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          margin: "50px",
-        }}
-      >
+      <Box sx={{ display: "flex", alignItems: "center", m: 4 }}>
         <TextField
           fullWidth
           placeholder="What movie are you looking for?"
-          onChange={handleTypeSearch}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              startSearch();
-            }
-          }}
-          sx={{ borderRadius: 8 }}
           value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && startSearch()}
         />
 
-        <IconButton
-          onClick={startSearch}
-          sx={{ height: "40px", width: "40px", m: 1 }}
-        >
+        <IconButton onClick={startSearch} sx={{ ml: 1 }}>
           <SearchIcon />
         </IconButton>
-      </div>
+      </Box>
 
       <Box
         sx={{
           display: "grid",
-          gap: "20px",
+          gap: 2,
           gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          margin: "50px",
+          m: 4,
         }}
       >
-        {movieList.map((movie, index) => {
-          const isLast = index === movieList.length - 1;
-
-          return (
-            <Box key={movie.imdbID} ref={isLast ? lastMovieRef : null}>
-              <div
-                onClick={() => handleOpenPosterDialog(movie)}
-                className="poster-wrapper"
-              >
-                <img
-                  src={movie.Poster !== "N/A" ? movie.Poster : EmptyPoster}
-                  alt={movie.Title}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = EmptyPoster;
-                  }}
-                />
-              </div>
-
-              <Tooltip title={movie.Title}>
-                <Typography
-                  noWrap
-                  sx={{
-                    maxWidth: 200,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {movie.Title}
-                </Typography>
-              </Tooltip>
-
-              <Typography>{movie.Year}</Typography>
-            </Box>
-          );
-        })}
+        {movies.map((movie, index) => (
+          <MovieCard
+            key={movie.imdbID}
+            movie={movie}
+            onClick={() => openPoster(movie)}
+            refProp={index === movies.length - 1 ? lastMovieRef : null}
+          />
+        ))}
       </Box>
 
       {loading && (
-        <Typography textAlign="center" sx={{ mb: 5 }}>
+        <Typography textAlign="center" sx={{ mb: 4 }}>
           Loading...
         </Typography>
       )}
 
-      {openMoviePoster && (
+      {selectedMovie && (
         <PosterDialog
-          open={openMoviePoster}
+          open={openDialog}
           movie={selectedMovie}
-          onClose={handleOpenPosterDialog}
+          onClose={() => setOpenDialog(false)}
         />
       )}
     </>
