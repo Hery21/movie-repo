@@ -1,13 +1,11 @@
-// src/pages/__tests__/MovieDetailPage.test.jsx
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import MovieDetailPage from "../MovieDetailPage";
 import { getData } from "../../utils/fetch";
 
-// CORRECT WAY TO MOCK IMAGES IN VITEST
 vi.mock("../../assets/EmptyMovie.png", () => ({
-  default: "test-empty-poster.png", // <-- must have "default"
+  default: "test-empty-poster.png",
 }));
 
 vi.mock("../../utils/fetch", () => ({
