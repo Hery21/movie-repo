@@ -1,4 +1,3 @@
-// pages/HomePage.jsx
 import { Box, IconButton, TextField, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
