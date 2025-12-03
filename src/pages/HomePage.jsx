@@ -1,14 +1,19 @@
 import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { getData } from "../utils/fetch";
 import EmptyPoster from "../assets/EmptyMovie.png";
 import PosterDialog from "../components/PosterDialog";
+import { useDispatch, useSelector } from "react-redux";
+import { setStoredSearchTerm } from "../redux/slice";
 
 function HomePage() {
   const ref = useRef();
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const dispatch = useDispatch();
+  const savedTerm = useSelector((state) => state.search.term);
+
+  const [searchTerm, setSearchTerm] = useState(savedTerm);
   const [movieList, setMovieList] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -63,10 +68,20 @@ function HomePage() {
   );
 
   const startSearch = () => {
+    dispatch(setStoredSearchTerm(searchTerm));
+
     setMovieList([]);
     setPage(1);
     fetchMovies(1);
   };
+
+  useEffect(() => {
+    if (!savedTerm) return;
+
+    setTimeout(() => {
+      fetchMovies(savedTerm);
+    }, 0);
+  }, [savedTerm, fetchMovies]);
 
   const lastMovieRef = useCallback(
     (node) => {
@@ -113,6 +128,7 @@ function HomePage() {
             }
           }}
           sx={{ borderRadius: 8 }}
+          value={searchTerm}
         />
 
         <IconButton
