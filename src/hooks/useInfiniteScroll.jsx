@@ -1,4 +1,3 @@
-// hooks/useInfiniteScroll.js
 import { useRef, useCallback } from "react";
 
 export function useInfiniteScroll(hasMore, loading, onLoadMore) {

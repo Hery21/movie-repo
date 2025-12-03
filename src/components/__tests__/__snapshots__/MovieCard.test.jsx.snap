@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MovieCard Component (OMDb) > matches snapshot 1`] = `
+<div>
+  <div
+    class="MuiBox-root css-4g6ai3"
+  >
+    <div
+      class="poster-wrapper"
+    >
+      <img
+        alt="Batman Begins"
+        src="https://example.com/batman.jpg"
+      />
+    </div>
+    <div>
+      <p
+        class="MuiTypography-root MuiTypography-body1 MuiTypography-noWrap css-1rd9tky-MuiTypography-root"
+      >
+        Batman Begins
+      </p>
+    </div>
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-rizt0-MuiTypography-root"
+    >
+      2005
+    </p>
+  </div>
+</div>
+`;
